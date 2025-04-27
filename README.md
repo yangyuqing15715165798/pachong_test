@@ -1,6 +1,5 @@
 # 中央纪委国家监委公开通报爬虫
 
-# CCDI Selenium Web Scraper
 
 ## 描述
 
