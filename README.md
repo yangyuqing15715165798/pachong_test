@@ -1,119 +1,105 @@
 # 中央纪委国家监委公开通报爬虫
 
-这是一个基于Selenium的爬虫工具，用于爬取中央纪委国家监委网站的公开通报信息，包括列表页和详情页内容。
+# CCDI Selenium Web Scraper
 
-## 功能特点
+## 描述
 
-- **多页爬取**：自动爬取多个页面的内容，默认爬取10页
-- **详情页抓取**：访问每篇文章的详情页，获取完整内容
-- **智能解析**：使用多种选择器策略，增强内容提取的成功率
-- **数据完整**：提取标题、链接、摘要、正文、发布来源、发布时间等信息
-- **健壮性设计**：完善的错误处理和异常捕获机制
-- **友好交互**：详细的日志输出，实时展示爬取进度
-- **灵活配置**：可自定义爬取页数和其他参数
-- **反爬对策**：随机延时、自定义请求头，避免被网站封禁
+这是一个使用 Python 和 Selenium 编写的网络爬虫，用于从中央纪委国家监委网站 (`www.ccdi.gov.cn`) 抓取特定主题（"中央纪委国家监委公开通报"）的搜索结果。脚本能够爬取文章列表，并进一步访问每个文章的详情页以提取正文、来源和发布时间。
 
-## 环境要求
+## 功能特性
 
-- Python 3.6+
-- Chrome或Firefox浏览器（推荐使用Chrome）
-- 相应的WebDriver（爬虫会尝试自动寻找）
+*   **多页爬取:** 能够自动翻页并爬取指定数量的搜索结果页面。
+*   **详情提取:** 访问列表中的文章链接，抓取文章详情页的内容（正文、来源、时间）。
+*   **动态 URL 构建:** 根据页码动态生成目标 URL。
+*   **健壮性:**
+    *   尝试使用多种 CSS 选择器来定位元素，提高对页面结构变化的适应性。
+    *   包含基本的错误处理（超时、元素未找到）。
+    *   优先尝试 Chrome 驱动，失败则尝试 Firefox 驱动。
+*   **数据存储:** 将抓取结果保存为 CSV 和 JSON 两种格式。
+*   **HTML 存档:** 将每个文章详情页的 HTML 源码保存到本地文件夹 (`article_details`)，便于调试和离线分析。
+*   **反爬规避:**
+    *   设置了常见的浏览器 User-Agent。
+    *   在页面和详情页请求之间加入了随机延时。
 
-## 依赖库
+## 技术栈
 
-```
-selenium==4.15.2
-pandas==2.1.0
-webdriver-manager==4.0.1
-```
+*   **Python 3.x**
+*   **Selenium:** 核心的浏览器自动化和网页抓取库。
+*   **Pandas:** 用于数据处理和导出为 CSV 文件。
+*   **JSON:** Python 内置库，用于导出为 JSON 文件。
+*   **WebDrivers:** 需要安装 [ChromeDriver](https://chromedriver.chromium.org/downloads) 或 [GeckoDriver](https://github.com/mozilla/geckodriver/releases) (Firefox)。脚本会优先尝试 Chrome。
+*   **Urllib:** 用于 URL 解析和构建。
+*   **Re (正则表达式):** 用于从文本中提取特定格式的信息。
+*   **OS, Time, Random:** Python 内置库，用于文件操作、延时和随机数生成。
 
-## 安装依赖
+## 安装与设置
 
-```bash
-pip install -r requirements.txt
-```
+1.  **克隆仓库或下载代码:**
+    ```bash
+    git clone <your-repo-url>
+    cd <your-repo-directory>
+    ```
+2.  **安装 Python 依赖:**
+    建议在虚拟环境中安装。
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # Linux/macOS
+    # 或者
+    # venv\Scripts\activate  # Windows
 
-## 使用方法
+    pip install -r requirements.txt
+    ```
+3.  **安装 WebDriver:**
+    *   确保你安装了 Chrome 或 Firefox 浏览器。
+    *   下载与你的浏览器版本对应的 WebDriver:
+        *   [ChromeDriver](https://chromedriver.chromium.org/downloads)
+        *   [GeckoDriver (for Firefox)](https://github.com/mozilla/geckodriver/releases)
+    *   将下载的 WebDriver 可执行文件（如 `chromedriver.exe` 或 `geckodriver.exe`）放置在系统的 PATH 环境变量所包含的目录下，或者直接放在项目根目录下。
 
-1. 安装所需依赖库
-2. 确保已安装Chrome或Firefox浏览器
-3. 运行爬虫脚本：
+## 如何运行
+
+直接在终端中运行 Python 脚本：
 
 ```bash
 python selenium_spider.py
 ```
 
-4. 爬虫会自动执行以下操作：
-   - 打开浏览器并访问目标网站
-   - 爬取多个页面的内容（默认10页）
-   - 访问每篇文章的详情页获取完整内容
-   - 将爬取的数据保存为CSV和JSON格式
-   - 将详情页HTML保存在article_details文件夹中
+*   默认情况下，脚本会尝试爬取前 `3` 页的搜索结果（可以在 `main` 函数中的 `max_pages` 变量修改）。
+*   脚本运行时会在控制台打印当前的爬取状态和进度信息。
+
+## 输出
+
+脚本运行成功后，会生成以下文件和目录：
+
+*   `ccdi_selenium_reports.csv`: 包含所有爬取到的文章信息的 CSV 文件。
+*   `ccdi_selenium_reports.json`: 包含所有爬取到的文章信息的 JSON 文件。
+*   `article_details/` (目录): 包含所有成功访问的文章详情页的 HTML 源码文件。
+*   `selenium_page_source.html`: (如果爬取了第一页) 第一页列表页面的 HTML 源码，用于调试。
 
 ## 代码结构
 
-- `selenium_spider.py`：主爬虫程序
-- `requirements.txt`：依赖库列表
-- `article_details/`：保存文章详情页HTML的文件夹
-- `selenium_page_source.html`：保存第一页源码用于调试
-- `ccdi_selenium_reports.csv`：CSV格式的爬取结果
-- `ccdi_selenium_reports.json`：JSON格式的爬取结果
-
-## 主要功能模块
-
-- `CCDISeleniumSpider`类：爬虫的主类，包含所有爬取功能
-- `setup_driver()`：设置Selenium浏览器驱动
-- `crawl_multiple_pages()`：爬取多个页面的内容
-- `crawl_page()`：爬取单个页面的内容
-- `crawl_article_detail()`：爬取文章详情页
-- `find_next_page_link()`：寻找下一页链接
-- `get_total_pages()`：获取网站总页数
-- `save_to_csv()`和`save_to_json()`：保存爬取结果
-
-## 参数配置
-
-关键参数可在`main()`函数中调整：
-
-```python
-# 设置要爬取的最大页数
-max_pages = 10  # 可以根据需要调整
-```
-
-其他配置项：
-- `with_details=True`：是否爬取详情页，设为False可以只爬取列表页
-- `build_url(page_num)`：构建页面URL的方法，可根据网站变化调整
-
-## 爬取的数据字段
-
-爬虫会提取以下信息：
-
-- `标题`：文章标题
-- `链接`：文章URL
-- `日期`：搜索结果页显示的日期
-- `摘要`：文章摘要
-- `正文`：文章详细内容
-- `发布来源`：文章发布机构/来源
-- `发布时间`：详细的文章发布时间
-- `爬取页码`：数据来源的页码
-
-## 优化与调整
-
-1. **提高爬取速度**：
-   - 在`crawl_multiple_pages()`中调整延时参数
-   - 考虑启用浏览器的无头模式（headless mode）
-
-2. **调整浏览器选项**：
-   - 在`setup_driver()`方法中取消注释`options.add_argument('--headless')`
-
-3. **增加爬取页数**：
-   - 修改`main()`函数中的`max_pages`参数
+*   **`CCDISeleniumSpider` 类:** 封装了爬虫的主要逻辑。
+    *   `__init__`: 初始化 URL、参数、结果列表、文件夹路径等。
+    *   `build_url`: 根据页码构建完整的请求 URL。
+    *   `setup_driver`: 配置并初始化 Selenium WebDriver 实例。
+    *   `crawl_multiple_pages`: 控制爬取多个页面的主循环。
+    *   `get_total_pages`: (当前未使用，但尝试过) 尝试从页面获取总页数。
+    *   `crawl_page`: 爬取单个列表页，提取文章基本信息，并调用详情页爬取。
+    *   `get_current_page_number`: 从 URL 中提取当前页码。
+    *   `find_next_page_link`: (当前未使用) 尝试查找"下一页"的链接。
+    *   `crawl_article_detail`: 爬取单个文章详情页，提取正文、来源、时间，并保存 HTML。
+    *   `save_to_csv`: 将结果保存为 CSV。
+    *   `save_to_json`: 将结果保存为 JSON。
+    *   `close`: 关闭 WebDriver。
+*   **`main()` 函数:** 程序入口，创建爬虫实例，调用爬取和保存方法，并确保 WebDriver 关闭。
+*   **`if __name__ == "__main__":`:** 确保 `main()` 函数只在脚本直接运行时执行。
 
 ## 注意事项
 
-- 请合理设置爬取频率，避免对目标网站造成过大压力
-- 爬取的内容仅供学习和研究使用，请遵守相关法律法规
-- 如遇到网站结构变化，可能需要更新选择器策略
-- 爬虫会保存详情页HTML，可能占用较大磁盘空间，请注意清理
+*   **网站结构变化:** 网站的 HTML 结构可能会改变，导致 CSS 选择器失效。如果脚本无法正常抓取数据，需要检查网站源码并更新 `selenium_spider.py` 中的选择器。
+*   **反爬虫机制:** 目标网站可能存在更复杂的反爬虫措施。如果遇到频繁的失败或验证码，可能需要更高级的技术（如代理 IP、更复杂的请求头模拟、验证码识别服务等）。
+*   **WebDriver 兼容性:** 确保你的 WebDriver 版本与浏览器版本兼容。
+*   **法律和道德:** 请遵守目标网站的 `robots.txt` 文件（如果存在）和服务条款。负责任地进行网络爬取，避免对网站服务器造成过大负担。
 
 ## 更新日志
 
